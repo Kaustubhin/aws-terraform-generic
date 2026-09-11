@@ -43,8 +43,8 @@ Each module's outputs are maps too, e.g. `module.ec2.ids["web-1"]`.
 ├── variables.tf          # aws_region, config_file
 ├── outputs.tf
 ├── providers.tf
-├── resources.yaml         # <- edit this to add/remove resources
-├── resources.json.example # same schema, JSON instead of YAML
+├── resources.yaml         # <- your live config (edit this to add/remove resources)
+├── resources.json         # same data as resources.yaml, JSON format
 └── modules/
     ├── ec2/   (main.tf, variables.tf, outputs.tf)
     ├── s3/    (main.tf, variables.tf, outputs.tf)
@@ -53,31 +53,37 @@ Each module's outputs are maps too, e.g. `module.ec2.ids["web-1"]`.
 
 `yamldecode()` also parses JSON (JSON is a valid YAML subset), so the same
 code path handles both formats — just point `config_file` at whichever one
-you're using. Every field the modules don't strictly require is wrapped in
-`try(..., default)`, so your YAML entries only need to set what differs
-from the default — see each module's `variables.tf` description for the
-full list of defaults.
+you're using. `resources.yaml` and `resources.json` in this project hold
+the same data in each format; pick one as your source of truth rather than
+maintaining both by hand. Every field the modules don't strictly require is
+wrapped in `try(..., default)`, so your config entries only need to set
+what differs from the default — see each module's `variables.tf`
+description for the full list of defaults.
 
 ## Usage
 
-1. Edit `resources.yaml` (or create your own file and set `-var="config_file=myfile.json"`).
-2. Init and plan:
+`resources.yaml` already contains your current environment (3 EC2 instances,
+3 S3 buckets, 2 EKS clusters). Edit it directly to add/remove/change
+resources, then:
 
-   ```bash
-   terraform init
-   terraform plan
-   terraform apply
-   ```
+```bash
+terraform init
+terraform plan
+terraform apply
+```
 
-3. To target a different environment, keep a `resources.yaml` per env
-   (e.g. `envs/dev.yaml`, `envs/prod.yaml`) and pass it in:
+If you'd rather work from JSON, `resources.json` has the same data — point
+`config_file` at it instead: `terraform apply -var="config_file=resources.json"`.
 
-   ```bash
-   terraform apply -var="config_file=envs/prod.yaml"
-   ```
+To target a different environment, keep a config file per env
+(e.g. `envs/dev.yaml`, `envs/prod.yaml`) and pass it in:
 
-   Or use separate `terraform workspace`s / backends per env, each pointing
-   at its own config file via a `.tfvars` file.
+```bash
+terraform apply -var="config_file=envs/prod.yaml"
+```
+
+Or use separate `terraform workspace`s / backends per env, each pointing
+at its own config file via a `.tfvars` file.
 
 ## Creating many similar resources at once (10 EC2, 15 S3, 3 EKS, ...)
 
@@ -130,8 +136,7 @@ ec2_instances:
 ```
 
 You can freely mix fan-out blocks and single explicit blocks (with their own
-`name`) in the same list — see `resources.yaml` for a full example covering
-10 EC2 instances, 15 S3 buckets, and 3 EKS clusters.
+`name`) in the same list.
 
 ## Adding a resource
 
