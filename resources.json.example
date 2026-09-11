@@ -1,0 +1,32 @@
+{
+  "ec2_instances": [
+    {
+      "name": "web-server-1",
+      "ami": "ami-0abcdef1234567890",
+      "instance_type": "t3.micro",
+      "subnet_id": "subnet-0123456789abcdef0",
+      "vpc_security_group_ids": ["sg-0123456789abcdef0"],
+      "associate_public_ip_address": true,
+      "tags": { "Environment": "dev", "Team": "platform" }
+    }
+  ],
+  "s3_buckets": [
+    {
+      "name": "my-app-logs-bucket-kb01",
+      "versioning": true,
+      "tags": { "Environment": "dev" }
+    }
+  ],
+  "eks_clusters": [
+    {
+      "name": "dev-cluster",
+      "kubernetes_version": "1.29",
+      "cluster_role_arn": "arn:aws:iam::123456789012:role/eks-cluster-role",
+      "subnet_ids": ["subnet-aaa111", "subnet-bbb222"],
+      "node_role_arn": "arn:aws:iam::123456789012:role/eks-node-role",
+      "desired_size": 2,
+      "min_size": 1,
+      "max_size": 4
+    }
+  ]
+}
